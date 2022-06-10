@@ -14,30 +14,22 @@
 </template>
 <script>
 export default {
-  //props: ['config'],
+  props: ["config"],
   data() {
     return {
-      value: true,
-      config: {
-        userId: "userid",
-        selectedDevice: {
-          name: "home",
-          dId: "12345",
-          templateName: "Power Sensor",
-          templateId: "236574685t7g5",
-          saverRule: true
-        },
-        variableFullName: "Pump",
-        variable: "uniquestr",
-        icon: "fa-sun",
-        column: "col-6",
-        widgets: "indicator",
-        class: "success"
-      }
+      value: false
     };
   },
   mounted() {
-    this.$nuxt.$on("widget-topic", this.processReceiveData);
+    const topic =
+      this.config.userId +
+      "/" +
+      this.config.selectedDevice.dId +
+      "/" +
+      this.config.variable +
+      "/sdata";
+    this.$nuxt.$on(topic, this.processReceiveData);
+    console.log(topic);
   },
   methods: {
     processReceiveData(data) {
