@@ -1,7 +1,7 @@
 {
-  "name": "app",
+  "name": "iot_dash",
   "version": "1.0.0",
-  "description": "IOT_JULCODE_APP",
+  "description": "IOT_Dash_APP",
   "author": "Julcode",
   "scripts": {
     "dev": "nuxt",
