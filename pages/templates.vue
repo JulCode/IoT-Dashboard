@@ -554,7 +554,11 @@
 
     <!-- DASHBOARD PREVIEW -->
     <div class="row">
-      <div v-for="(widget, index) of widgets" :class="[widget.column]">
+      <div
+        v-for="(widget, index) of widgets"
+        :key="index"
+        :class="[widget.column]"
+      >
         <i
           aria-hidden="true"
           class="fa fa-trash text-warning pull-right"
@@ -811,6 +815,9 @@ export default {
         this.iotIndicatorConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.iotIndicatorConfig)));
       }
+    },
+    deleteWidget(widget) {
+      this.widgets.splice(widget, 1);
     },
     makeid(length) {
       var result = "";
