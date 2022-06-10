@@ -77,6 +77,16 @@
           ></el-table-column>
           <el-table-column label="Actions" width="180">
             <div slot-scope="{ row, $index }">
+              <el-tooltip content="Database Saver">
+                <base-switch
+                  :value="row.saverRule"
+                  type="primary"
+                  on-text="On"
+                  off-text="Off"
+                  @click="updateSaverRules($index)"
+                ></base-switch>
+              </el-tooltip>
+
               <el-tooltip
                 content="Delete"
                 effect="light"
@@ -104,6 +114,7 @@
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
+
 export default {
   components: {
     [Table.name]: Table,
@@ -118,13 +129,15 @@ export default {
           dId: "12345",
           name: "Home",
           templateName: "Power Sensor",
-          templateId: "236574685t7g5"
+          templateId: "236574685t7g5",
+          saverRule: true
         },
         {
           dId: "45",
           name: "office",
           templateName: "Power Sensor",
-          templateId: "236574685t7g5"
+          templateId: "236574685t7g5",
+          saverRule: false
         }
       ]
     };
@@ -132,6 +145,9 @@ export default {
   methods: {
     deleteDevice(id) {
       alert("Delete " + id.name);
+    },
+    updateSaverRules(id) {
+      this.devices[id].saverRule = !this.devices[id].saverRule;
     }
   }
 };
