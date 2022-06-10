@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Add Devices -->
     <div class="row">
       <card>
         <div slot="header">
@@ -58,6 +59,7 @@
         </div>
       </card>
     </div>
+    <!-- Table Devices -->
     <div class="row">
       <card>
         <div slot="header">
@@ -75,9 +77,19 @@
             label="Template"
             prop="templateName"
           ></el-table-column>
+          <!--Actions-->
           <el-table-column label="Actions" width="180">
             <div slot-scope="{ row, $index }">
-              <el-tooltip content="Database Saver">
+              <el-tooltip content="Database Saver" style="margin-right:10px">
+                <i
+                  class="fas fa-database "
+                  :class="{
+                    'text-success': row.saverRule,
+                    'text-danger': !row.saverRule
+                  }"
+                ></i>
+              </el-tooltip>
+              <el-tooltip content="Saver Status Indicator">
                 <base-switch
                   :value="row.saverRule"
                   type="primary"
@@ -108,19 +120,22 @@
         </el-table>
       </card>
     </div>
+    <Json :value="devices"></Json>
   </div>
 </template>
 
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
+import Json from "../components/Json.vue";
 
 export default {
   components: {
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
     [Select.name]: Select,
-    [Option.name]: Option
+    [Option.name]: Option,
+    Json
   },
   data() {
     return {
