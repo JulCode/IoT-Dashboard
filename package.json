@@ -5,6 +5,7 @@
   "author": "Julcode",
   "scripts": {
     "dev": "nuxt",
+    "devnm": "nodemon index.js",
     "devn": "nodemon api/index.js --exec babel-node",
     "build": "nuxt build",
     "generate": "nuxt generate",

@@ -24,7 +24,43 @@ app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });
 
-//endpoint
-app.get("/", (req, res) => {
-  res.send("bye dude");
-});
+//mongodb Connection
+const mongoUserName = "devuser";
+const mongoPassword = "devpassword";
+const mongoHost = "localhost";
+const mongoPort = "27018";
+const mongoDatabase = "iotJul";
+
+var uri =
+  "mongodb://" +
+  mongoUserName +
+  ":" +
+  mongoPassword +
+  "@" +
+  mongoHost +
+  ":" +
+  mongoPort +
+  "/" +
+  mongoDatabase;
+
+const options = {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+  authSource: "admin"
+};
+
+try {
+  mongoose.connect(uri, options).then(
+    () => {
+      console.log("MongoDB connected successfully".green);
+    },
+    err => {
+      console.log("MongoDB connection error".red);
+      console.log(err);
+    }
+  );
+} catch (error) {
+  console.log("Error MongoDB connection".red);
+  console.log(error);
+}
