@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-//const jws = require("jsonwebtoken");
+const jws = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 //models import
@@ -40,7 +40,37 @@ router.post("/register", async (req, res) => {
 });
 
 // login user
-router.post("/login", (req, res) => {});
+router.post("/login", async (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  var user = await User.findOne({ email: email });
+  if (!user) {
+    const toSend = {
+      status: "error",
+      message: "Invalid Credentials"
+    };
+    return res.status(401).json(toSend);
+  }
+  if (!bcrypt.compareSync(password, user.password)) {
+    const toSend = {
+      status: "error",
+      message: "Invalid Credentials"
+    };
+    return res.status(401).json(toSend);
+  } else {
+    user.set("password", undefined, { strict: false });
+    const token = jws.sign({ userData: user }, "securePassword", {
+      expiresIn: 60 * 60 * 24 * 30
+    });
+    const toSend = {
+      status: "ok",
+      token: token,
+      userData: user
+    };
+    return res.json(toSend);
+  }
+});
 
 router.get("/new-user", async (req, res) => {
   try {
