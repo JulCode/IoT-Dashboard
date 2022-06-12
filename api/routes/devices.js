@@ -8,7 +8,25 @@ import Device from "../models/device";
 /*-----------------API--------------------*/
 
 //get all devices
-router.get("/device", checkAuth, async (req, res) => {});
+router.get("/device", checkAuth, async (req, res) => {
+  try {
+    const userId = req.userData._id;
+    const devices = await Device.find({ userId: userId });
+
+    const toSend = {
+      status: "success",
+      data: devices
+    };
+    res.json(toSend);
+  } catch (error) {
+    console.log("Error GETTING DEVICES", error);
+    const toSend = {
+      status: "error",
+      message: error
+    };
+    res.status(500).json(toSend);
+  }
+});
 //create new device
 router.post("/device", checkAuth, async (req, res) => {
   try {
