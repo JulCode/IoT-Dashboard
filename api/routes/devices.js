@@ -3,19 +3,19 @@ const router = express.Router();
 
 const { checkAuth } = require("../middlewares/authentication");
 
-//get all devices
-router.get("/device", checkAuth, (req, res) => {
-  console.log(req.userData);
+//MODELS
+import Device from "../models/device";
+//API
 
-  res.status(200).json({
-    status: "success"
-  });
-});
+//get all devices
+router.get("/device", checkAuth, (req, res) => {});
 //create new device
 router.post("/device", (req, res) => {});
 //delete device
 router.delete("/device", (req, res) => {});
 //update device
 router.put("/device", (req, res) => {});
+
+//Function
 
 module.exports = router;
