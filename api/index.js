@@ -50,17 +50,12 @@ const options = {
   authSource: "admin"
 };
 
-try {
-  mongoose.connect(uri, options).then(
-    () => {
-      console.log("MongoDB connected successfully".green);
-    },
-    err => {
-      console.log("MongoDB connection error".red);
-      console.log(err);
-    }
-  );
-} catch (error) {
-  console.log("Error MongoDB connection".red);
-  console.log(error);
-}
+mongoose.connect(uri, options).then(
+  () => {
+    console.log("MongoDB connected successfully".green);
+  },
+  err => {
+    console.log("MongoDB connection error".red);
+    console.log(err);
+  }
+);
