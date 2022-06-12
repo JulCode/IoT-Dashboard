@@ -55,7 +55,28 @@ router.post("/device", checkAuth, async (req, res) => {
   }
 });
 //delete device
-router.delete("/device", (req, res) => {});
+router.delete("/device", checkAuth, async (req, res) => {
+  try {
+    const userId = req.userData._id;
+    const dId = req.query.dId;
+
+    const result = await Device.deleteOne({ userId: userId, dId: dId });
+
+    const toSend = {
+      status: "success",
+      data: result
+    };
+    return res.json(toSend);
+  } catch (error) {
+    console.log("Error DELETING DEVICE: " + error);
+
+    const toSend = {
+      status: "error",
+      message: error.message
+    };
+    return res.status(500).json(toSend);
+  }
+});
 //update device
 router.put("/device", (req, res) => {});
 
