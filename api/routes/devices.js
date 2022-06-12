@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
+const { checkAuth } = require("../middlewares/authentication");
+
 //get all devices
-router.get("/device", (req, res) => {
-  console.log(req.query);
-  var toReturn = {
-    status: "ok",
-    data: "a b c d e f"
-  };
-  res.json(toReturn);
+router.get("/device", checkAuth, (req, res) => {
+  console.log(req.userData);
+
+  res.status(200).json({
+    status: "success"
+  });
 });
 //create new device
 router.post("/device", (req, res) => {});
