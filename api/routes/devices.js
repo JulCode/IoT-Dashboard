@@ -39,6 +39,7 @@ router.post("/device", checkAuth, async (req, res) => {
     newDevice.createdTime = Date.now();
 
     const device = await Device.create(newDevice);
+    selectDevice(userId, newDevice.dId);
 
     const toSend = {
       status: "success"
@@ -78,8 +79,38 @@ router.delete("/device", checkAuth, async (req, res) => {
   }
 });
 //update device
-router.put("/device", (req, res) => {});
+router.put("/device", checkAuth, async (req, res) => {
+  const dId = req.body.dId;
+  const userId = req.userData._id;
+
+  if (selectDevice(userId, dId)) {
+    const toSend = {
+      status: "success"
+    };
+    return res.json(toSend);
+  } else {
+    const toSend = {
+      status: "error"
+    };
+  }
+});
 
 /*-----------------fucntion--------------------*/
+async function selectDevice(userId, dId) {
+  try {
+    const result = await Device.updateMany(
+      { userId: userId },
+      { selected: false }
+    );
+    const result2 = await Device.updateMany(
+      { userId: userId, dId: dId },
+      { selected: true }
+    );
+    return true;
+  } catch (error) {
+    console.log("Error SELECTING DEVICE: " + error);
+    return false;
+  }
+}
 
 module.exports = router;
