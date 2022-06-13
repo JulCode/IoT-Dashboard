@@ -1,20 +1,22 @@
 <template>
   <div>
-    <!-- Add Devices -->
+    <!-- FORM ADD DEVICE -->
     <div class="row">
       <card>
         <div slot="header">
           <h4 class="card-title">Add new Device</h4>
         </div>
+
         <div class="row">
           <div class="col-4">
             <base-input
               label="Device Name"
               type="text"
-              placeholder="Ex: home, office..."
+              placeholder="Ex: Home, Office..."
             >
             </base-input>
           </div>
+
           <div class="col-4">
             <base-input
               label="Device Id"
@@ -25,7 +27,10 @@
           </div>
 
           <div class="col-4">
-            <slot name="label"> <label>Template</label> </slot>"
+            <slot name="label">
+              <label> Template </label>
+            </slot>
+
             <el-select
               value="1"
               placeholder="Select Template"
@@ -34,68 +39,78 @@
             >
               <el-option
                 class="text-dark"
+                value="Template 1"
                 label="Template 1"
-                value="1"
               ></el-option>
+
               <el-option
                 class="text-dark"
+                value="Template 2"
                 label="Template 2"
-                value="2"
               ></el-option>
+
               <el-option
                 class="text-dark"
+                value="Template 3"
                 label="Template 3"
-                value="3"
               ></el-option>
             </el-select>
           </div>
         </div>
+
         <div class="row pull-right">
           <div class="col-12">
-            <base-button type="primary" size="lg" class="mb-3">
-              Add
-            </base-button>
+            <base-button type="primary" class="mb-3" size="lg">Add</base-button>
           </div>
         </div>
       </card>
     </div>
-    <!-- Table Devices -->
+
+    <!-- DEVICES TABLE -->
     <div class="row">
       <card>
         <div slot="header">
           <h4 class="card-title">Devices</h4>
         </div>
+
         <el-table :data="devices">
           <el-table-column label="#" min-width="50" align="center">
             <div slot-scope="{ row, $index }">
               {{ $index + 1 }}
             </div>
           </el-table-column>
-          <el-table-column label="Name" prop="name"></el-table-column>
-          <el-table-column label="Device Id" prop="dId"></el-table-column>
+
+          <el-table-column prop="name" label="Name"></el-table-column>
+
+          <el-table-column prop="dId" label="Device Id"></el-table-column>
+
           <el-table-column
-            label="Template"
             prop="templateName"
+            label="Template"
           ></el-table-column>
-          <!--Actions-->
-          <el-table-column label="Actions" width="180">
+
+          <el-table-column label="Actions">
             <div slot-scope="{ row, $index }">
-              <el-tooltip content="Database Saver" style="margin-right:10px">
+              <el-tooltip
+                content="Saver Status Indicator"
+                style="margin-right:10px"
+              >
                 <i
                   class="fas fa-database "
                   :class="{
                     'text-success': row.saverRule,
-                    'text-danger': !row.saverRule
+                    'text-dark': !row.saverRule
                   }"
                 ></i>
               </el-tooltip>
-              <el-tooltip content="Saver Status Indicator">
+
+              <el-tooltip content="Database Saver">
                 <base-switch
+                  @click="updateSaverRuleStatus($index)"
                   :value="row.saverRule"
                   type="primary"
                   on-text="On"
                   off-text="Off"
-                  @click="updateSaverRules($index)"
                 ></base-switch>
               </el-tooltip>
 
@@ -107,12 +122,12 @@
               >
                 <base-button
                   type="danger"
-                  size="sm"
                   icon
+                  size="sm"
                   class="btn-link"
                   @click="deleteDevice(row)"
                 >
-                  <i class="tim-icons icon-simple-remove"></i>
+                  <i class="tim-icons icon-simple-remove "></i>
                 </base-button>
               </el-tooltip>
             </div>
@@ -120,6 +135,7 @@
         </el-table>
       </card>
     </div>
+
     <Json :value="devices"></Json>
   </div>
 </template>
@@ -127,43 +143,62 @@
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
-import Json from "../components/Json.vue";
-
 export default {
   middleware: "authenticated",
   components: {
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
-    [Select.name]: Select,
     [Option.name]: Option,
-    Json
+    [Select.name]: Select
   },
   data() {
     return {
       devices: [
         {
-          dId: "12345",
           name: "Home",
+          dId: "8888",
           templateName: "Power Sensor",
-          templateId: "236574685t7g5",
+          templateId: "984237562348756ldksjfh",
+          saverRule: false
+        },
+        {
+          name: "Office",
+          dId: "1111",
+          templateName: "Power Sensor",
+          templateId: "984237562348756ldksjfh",
           saverRule: true
         },
         {
-          dId: "45",
-          name: "office",
+          name: "Farm",
+          dId: "99999",
           templateName: "Power Sensor",
-          templateId: "236574685t7g5",
-          saverRule: false
+          templateId: "984237562348756ldksjfh",
+          saverRule: true
         }
       ]
     };
   },
+  mounted() {
+    this.getDevices();
+  },
   methods: {
-    deleteDevice(id) {
-      alert("Delete " + id.name);
+    getDevices() {
+      const axiosHeader = {
+        headers: {
+          token: this.$store.state.auth.token
+        }
+      };
+      this.$axios.get("/device", axiosHeader).then(res => {
+        console.log(res.data.data);
+        this.devices = res.data.data;
+      });
     },
-    updateSaverRules(id) {
-      this.devices[id].saverRule = !this.devices[id].saverRule;
+    deleteDevice(device) {
+      alert("DELETING " + device.name);
+    },
+    updateSaverRuleStatus(index) {
+      console.log(index);
+      this.devices[index].saverRule = !this.devices[index].saverRule;
     }
   }
 };

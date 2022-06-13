@@ -11,41 +11,45 @@ import User from "../models/user.js";
 
 //LOGIN
 router.post("/login", async (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  try {
+    const email = req.body.email;
+    const password = req.body.password;
 
-  var user = await User.findOne({ email: email });
+    var user = await User.findOne({ email: email });
 
-  //if no email
-  if (!user) {
-    const toSend = {
-      status: "error",
-      error: "Invalid Credentials"
-    };
-    return res.status(401).json(toSend);
-  }
+    //if no email
+    if (!user) {
+      const response = {
+        status: "error",
+        error: "Invalid Credentials"
+      };
+      return res.status(401).json(response);
+    }
 
-  //if email and email ok
-  if (bcrypt.compareSync(password, user.password)) {
-    user.set("password", undefined, { strict: false });
+    //if email and email ok
+    if (bcrypt.compareSync(password, user.password)) {
+      user.set("password", undefined, { strict: false });
 
-    const token = jwt.sign({ userData: user }, "securePasswordHere", {
-      expiresIn: 60 * 60 * 24 * 30
-    });
+      const token = jwt.sign({ userData: user }, "securePasswordHere", {
+        expiresIn: 60 * 60 * 24 * 30
+      });
 
-    const toSend = {
-      status: "success",
-      token: token,
-      userData: user
-    };
+      const response = {
+        status: "success",
+        token: token,
+        userData: user
+      };
 
-    return res.json(toSend);
-  } else {
-    const toSend = {
-      status: "error",
-      error: "Invalid Credentials"
-    };
-    return res.status(401).json(toSend);
+      return res.json(response);
+    } else {
+      const response = {
+        status: "error",
+        error: "Invalid Credentials"
+      };
+      return res.status(401).json(response);
+    }
+  } catch (error) {
+    console.log(error);
   }
 });
 

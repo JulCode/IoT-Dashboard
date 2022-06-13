@@ -17,14 +17,17 @@ router.get("/device", checkAuth, async (req, res) => {
       status: "success",
       data: devices
     };
+
     res.json(toSend);
   } catch (error) {
-    console.log("Error GETTING DEVICES", error);
+    console.log("ERROR GETTING DEVICES");
+
     const toSend = {
       status: "error",
       error: error
     };
-    res.status(500).json(toSend);
+
+    return res.status(500).json(toSend);
   }
 });
 //create new device
