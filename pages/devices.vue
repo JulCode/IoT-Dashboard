@@ -130,6 +130,7 @@ import { Select, Option } from "element-ui";
 import Json from "../components/Json.vue";
 
 export default {
+  middleware: "authenticated",
   components: {
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
