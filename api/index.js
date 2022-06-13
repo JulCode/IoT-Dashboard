@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 //express routes
 app.use("/api", require("./routes/devices.js"));
 app.use("/api", require("./routes/users.js"));
+app.use("/api", require("./routes/templates.js"));
 module.exports = app;
 
 //litener

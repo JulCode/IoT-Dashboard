@@ -802,6 +802,37 @@ export default {
     };
   },
   methods: {
+    async saveTemplate() {
+      const axiosHeaders = {
+        headers: {
+          token: this.$store.state.auth.token
+        }
+      };
+      const toSend = {
+        template: {
+          name: this.templateName,
+          description: this.templateDescription,
+          widgets: this.widgets
+        }
+      };
+      try {
+        const res = await this.$axios.post("/template", toSend, axiosHeaders);
+        if (res.data.status == "success") {
+          this.$notify({
+            icon: "tim-icons icon-alert-circle-exc",
+            message: "Template saved successfully",
+            type: "success"
+            //this.getTemplates();
+          });
+        }
+      } catch (error) {
+        this.$notify({
+          icon: "tim-icons icon-alert-circle-exc",
+          message: "Error saving template",
+          type: "danger"
+        });
+      }
+    },
     addNewWidget() {
       if (this.widgetType == "numberchart") {
         this.ncConfig.variable = this.makeid(10);
