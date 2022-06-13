@@ -555,7 +555,7 @@
     <!-- DASHBOARD PREVIEW -->
     <div class="row">
       <div
-        v-for="(widget, index) of widgets"
+        v-for="(widget, index) in widgets"
         :key="index"
         :class="[widget.column]"
       >
@@ -801,13 +801,41 @@ export default {
       }
     };
   },
+  mounted() {
+    this.getTemplates();
+  },
   methods: {
+    //Get Templates
+    async getTemplates() {
+      const axiosHeaders = {
+        headers: {
+          token: this.$store.state.auth.token
+        }
+      };
+      try {
+        const res = await this.$axios.get("/template", axiosHeaders);
+        console.log(res.data);
+        if (res.data.status == "success") {
+          this.templates = res.data.data;
+        }
+      } catch (error) {
+        this.$notify({
+          type: "danger",
+          icon: "tim-icons icon-alert-circle-exc",
+          message: "Error getting templates..."
+        });
+        console.log(error);
+        return;
+      }
+    },
+    //Save Template
     async saveTemplate() {
       const axiosHeaders = {
         headers: {
           token: this.$store.state.auth.token
         }
       };
+      console.log(axiosHeaders);
       const toSend = {
         template: {
           name: this.templateName,
@@ -819,37 +847,44 @@ export default {
         const res = await this.$axios.post("/template", toSend, axiosHeaders);
         if (res.data.status == "success") {
           this.$notify({
+            type: "success",
             icon: "tim-icons icon-alert-circle-exc",
-            message: "Template saved successfully",
-            type: "success"
-            //this.getTemplates();
+            message: "Template created!"
           });
+          this.getTemplates();
         }
       } catch (error) {
         this.$notify({
+          type: "danger",
           icon: "tim-icons icon-alert-circle-exc",
-          message: "Error saving template",
-          type: "danger"
+          message: "Error creating template..."
         });
+        console.log(error);
+        return;
       }
     },
+    //Add Widget
     addNewWidget() {
       if (this.widgetType == "numberchart") {
         this.ncConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.ncConfig)));
-      } else if (this.widgetType == "switch") {
+      }
+      if (this.widgetType == "switch") {
         this.iotSwitchConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.iotSwitchConfig)));
-      } else if (this.widgetType == "button") {
+      }
+      if (this.widgetType == "button") {
         this.configButton.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.configButton)));
-      } else if (this.widgetType == "indicator") {
-        this.iotIndicatorConfig.variable = this.makeid(10);
-        this.widgets.push(JSON.parse(JSON.stringify(this.iotIndicatorConfig)));
+      }
+      if (this.widgetType == "indicator") {
+        this.configIndicator.variable = this.makeid(10);
+        this.widgets.push(JSON.parse(JSON.stringify(this.configIndicator)));
       }
     },
-    deleteWidget(widget) {
-      this.widgets.splice(widget, 1);
+    //Delete Widget
+    deleteWidget(index) {
+      this.widgets.splice(index, 1);
     },
     makeid(length) {
       var result = "";
