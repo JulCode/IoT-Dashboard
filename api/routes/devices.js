@@ -22,7 +22,7 @@ router.get("/device", checkAuth, async (req, res) => {
     console.log("Error GETTING DEVICES", error);
     const toSend = {
       status: "error",
-      message: error
+      error: error
     };
     res.status(500).json(toSend);
   }
@@ -50,7 +50,7 @@ router.post("/device", checkAuth, async (req, res) => {
 
     const toSend = {
       status: "error",
-      message: error.message
+      error: error
     };
     return res.status(500).json(toSend);
   }
@@ -73,7 +73,7 @@ router.delete("/device", checkAuth, async (req, res) => {
 
     const toSend = {
       status: "error",
-      message: error.message
+      error: error
     };
     return res.status(500).json(toSend);
   }

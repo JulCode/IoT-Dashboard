@@ -1,16 +1,55 @@
 const express = require("express");
 const router = express.Router();
-const jws = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 //models import
-import User from "../models/user";
+import User from "../models/user.js";
 
 //POST -> req.body
 //GET -> req.query
 
-//AUTH
-// create new user
+//LOGIN
+router.post("/login", async (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  var user = await User.findOne({ email: email });
+
+  //if no email
+  if (!user) {
+    const toSend = {
+      status: "error",
+      error: "Invalid Credentials"
+    };
+    return res.status(401).json(toSend);
+  }
+
+  //if email and email ok
+  if (bcrypt.compareSync(password, user.password)) {
+    user.set("password", undefined, { strict: false });
+
+    const token = jwt.sign({ userData: user }, "securePasswordHere", {
+      expiresIn: 60 * 60 * 24 * 30
+    });
+
+    const toSend = {
+      status: "success",
+      token: token,
+      userData: user
+    };
+
+    return res.json(toSend);
+  } else {
+    const toSend = {
+      status: "error",
+      error: "Invalid Credentials"
+    };
+    return res.status(401).json(toSend);
+  }
+});
+
+//REGISTER
 router.post("/register", async (req, res) => {
   try {
     const name = req.body.name;
@@ -23,52 +62,28 @@ router.post("/register", async (req, res) => {
       email: email,
       password: encryptedPassword
     };
-    const user = await User.create(newUser);
+
+    var user = await User.create(newUser);
+
+    console.log(user);
+
     const toSend = {
-      status: "ok"
+      status: "success"
     };
-    res.json(toSend);
+
+    res.status(200).json(toSend);
   } catch (error) {
-    console.log("Error - register endpoint ", error);
+    console.log("ERROR - REGISTER ENDPOINT");
+    console.log(error);
 
     const toSend = {
       status: "error",
-      message: error.message
+      error: error
     };
-    res.status(500).json(toSend);
-  }
-});
 
-// login user
-router.post("/login", async (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+    console.log(toSend);
 
-  var user = await User.findOne({ email: email });
-  if (!user) {
-    const toSend = {
-      status: "error",
-      message: "Invalid Credentials"
-    };
-    return res.status(401).json(toSend);
-  }
-  if (!bcrypt.compareSync(password, user.password)) {
-    const toSend = {
-      status: "error",
-      message: "Invalid Credentials"
-    };
-    return res.status(401).json(toSend);
-  } else {
-    user.set("password", undefined, { strict: false });
-    const token = jws.sign({ userData: user }, "securePassword", {
-      expiresIn: 60 * 60 * 24 * 30
-    });
-    const toSend = {
-      status: "ok",
-      token: token,
-      userData: user
-    };
-    return res.json(toSend);
+    return res.status(500).json(toSend);
   }
 });
 
