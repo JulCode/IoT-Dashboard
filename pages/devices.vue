@@ -73,7 +73,7 @@
           <h4 class="card-title">Devices</h4>
         </div>
 
-        <el-table :data="devices">
+        <el-table :data="$store.state.devices">
           <el-table-column label="#" min-width="50" align="center">
             <div slot-scope="{ row, $index }">
               {{ $index + 1 }}
@@ -136,7 +136,7 @@
       </card>
     </div>
 
-    <Json :value="devices"></Json>
+    <Json :value="$store.state.devices"></Json>
   </div>
 </template>
 
@@ -152,47 +152,13 @@ export default {
     [Select.name]: Select
   },
   data() {
-    return {
-      devices: [
-        {
-          name: "Home",
-          dId: "8888",
-          templateName: "Power Sensor",
-          templateId: "984237562348756ldksjfh",
-          saverRule: false
-        },
-        {
-          name: "Office",
-          dId: "1111",
-          templateName: "Power Sensor",
-          templateId: "984237562348756ldksjfh",
-          saverRule: true
-        },
-        {
-          name: "Farm",
-          dId: "99999",
-          templateName: "Power Sensor",
-          templateId: "984237562348756ldksjfh",
-          saverRule: true
-        }
-      ]
-    };
+    return {};
   },
   mounted() {
-    this.getDevices();
+    //llamamos la action para obtener los devices
+    this.$store.dispatch("getDevices");
   },
   methods: {
-    getDevices() {
-      const axiosHeader = {
-        headers: {
-          token: this.$store.state.auth.token
-        }
-      };
-      this.$axios.get("/device", axiosHeader).then(res => {
-        console.log(res.data.data);
-        this.devices = res.data.data;
-      });
-    },
     deleteDevice(device) {
       alert("DELETING " + device.name);
     },
