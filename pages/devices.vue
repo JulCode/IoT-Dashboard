@@ -160,7 +160,34 @@ export default {
   },
   methods: {
     deleteDevice(device) {
-      alert("DELETING " + device.name);
+      const axiosHeader = {
+        headers: {
+          token: this.$store.state.auth.token
+        },
+        params: {
+          dId: device.dId
+        }
+      };
+      this.$axios
+        .delete("/device", axiosHeader)
+        .then(res => {
+          if (res.data.status === "success") {
+            this.$notify({
+              type: "success",
+              icon: "tim-icons icon-check-2",
+              message: device.name + " deleted successfully"
+            });
+            this.$store.dispatch("getDevices");
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          this.$notify({
+            type: "error",
+            icon: "tim-icons icon-alert-circle-exc",
+            message: "Error deleting " + device.name
+          });
+        });
     },
     updateSaverRuleStatus(index) {
       console.log(index);
