@@ -18,6 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", require("./routes/devices.js"));
 app.use("/api", require("./routes/users.js"));
 app.use("/api", require("./routes/templates.js"));
+app.use("/api", require("./routes/webhooks.js"));
+app.use("/api", require("./routes/emqxapi.js"));
 module.exports = app;
 
 //litener
@@ -29,7 +31,7 @@ app.listen(3001, () => {
 const mongoUserName = "devuser";
 const mongoPassword = "devpassword";
 const mongoHost = "localhost";
-const mongoPort = "27018";
+const mongoPort = "27017";
 const mongoDatabase = "iotJul";
 
 var uri =
