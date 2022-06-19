@@ -1,11 +1,19 @@
 const express = require("express");
 const router = express.Router();
+const axios = require("axios");
 
 const { checkAuth } = require("../middlewares/authentication");
+import SaverRule from "../models/emqx_saver_rule.js";
 
 /*-----------------MODELS--------------------*/
 import Device from "../models/device";
 /*-----------------API--------------------*/
+const auth = {
+  auth: {
+    username: "admin",
+    password: "emqxsecret"
+  }
+};
 
 //get all devices
 router.get("/device", checkAuth, async (req, res) => {
@@ -99,6 +107,7 @@ router.put("/device", checkAuth, async (req, res) => {
 });
 
 /*-----------------fucntion--------------------*/
+
 async function selectDevice(userId, dId) {
   try {
     const result = await Device.updateMany(
@@ -112,6 +121,60 @@ async function selectDevice(userId, dId) {
     return true;
   } catch (error) {
     console.log("Error SELECTING DEVICE: " + error);
+    return false;
+  }
+}
+
+/*
+ *-----------------SAVER RULES FUNCTIONS--------------------*
+ */
+setTimeout(() => {
+  createSaverRule("12121", "11111", false);
+}, 2000);
+async function createSaverRule(userId, dId, status) {
+  try {
+    const url = "http://localhost:8085/api/v4/rules";
+
+    const topic = userId + "/" + dId + "/+/sdata";
+
+    const rawsql =
+      'SELECT topic, payload FROM "' + topic + '"WHERE payload.save=1';
+
+    var newRule = {
+      rawsql: rawsql,
+      actions: [
+        {
+          name: "data_to_webserver",
+          params: {
+            $resource: global.saverResource.id,
+            payload_tmpl:
+              '{"userId":"' +
+              userId +
+              '","payload":":${payload},"topic":"${topic}"}'
+          }
+        }
+      ],
+      description: "SAVER-RULE",
+      enabled: status
+    };
+    //save rule in emqx
+    const res = await axios.post(url, newRule, auth);
+
+    if (res.status === 200 && res.data.data) {
+      console.log("SAVER RULE CREATED" + res.data.data);
+
+      await SaverRule.create({
+        userId: userId,
+        dId: dId,
+        emqxRuleId: res.data.data.id,
+        status: status
+      });
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log("Error CREATING SAVER RULE: " + error);
     return false;
   }
 }

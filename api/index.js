@@ -31,7 +31,7 @@ app.listen(3001, () => {
 const mongoUserName = "devuser";
 const mongoPassword = "devpassword";
 const mongoHost = "localhost";
-const mongoPort = "27017";
+const mongoPort = "27018";
 const mongoDatabase = "iotJul";
 
 var uri =

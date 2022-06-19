@@ -5,7 +5,7 @@ const colors = require("colors");
 
 router.post("/saver-webhook", async (req, res) => {
   const data = req.body;
-  console.log(data.m);
+  console.log(data);
   res.json("{}");
 });
 
