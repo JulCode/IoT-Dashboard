@@ -4,7 +4,7 @@
     <div class="row">
       <card>
         <div slot="header">
-          <h4 class="card-title">Widgets</h4>
+          <h4 class="card-title">Widgets {{ iotIndicatorConfig.column }}</h4>
         </div>
 
         <div class="row">
@@ -588,7 +588,7 @@
       </div>
     </div>
 
-    <!-- SAVE TEMPLATE-->
+    <!-- SAVE TEMPLATE FORM-->
     <div class="row">
       <card>
         <div slot="header">
@@ -642,7 +642,7 @@
         <div class="row">
           <el-table :data="templates">
             <el-table-column min-width="50" label="#" align="center">
-              <div class="photo" slot-scope="{ row, $index }">
+              <div class="photo" slot-scope="{ $index }">
                 {{ $index + 1 }}
               </div>
             </el-table-column>
@@ -660,10 +660,7 @@
             ></el-table-column>
 
             <el-table-column header-align="right" align="right" label="Actions">
-              <div
-                slot-scope="{ row, $index }"
-                class="text-right table-actions"
-              >
+              <div slot-scope="{ row }" class="text-right table-actions">
                 <el-tooltip
                   content="Delete"
                   effect="light"
@@ -688,7 +685,7 @@
     </div>
 
     <!-- JSONS -->
-    <Json :value="templates"></Json>
+    <Json :value="widgets"></Json>
   </div>
 </template>
 
@@ -874,6 +871,7 @@ export default {
           templateId: template._id
         }
       };
+      console.log(axiosHeaders);
       try {
         const res = await this.$axios.delete("/template", axiosHeaders);
         if (res.data.status == "success") {
@@ -882,13 +880,14 @@ export default {
             icon: "tim-icons icon-alert-circle-exc",
             message: template.name + " was deleted!"
           });
+
           this.getTemplates();
         }
       } catch (error) {
         this.$notify({
           type: "danger",
           icon: "tim-icons icon-alert-circle-exc",
-          message: "Error deleting template..."
+          message: "Error getting templates..."
         });
         console.log(error);
         return;
@@ -909,8 +908,8 @@ export default {
         this.widgets.push(JSON.parse(JSON.stringify(this.configButton)));
       }
       if (this.widgetType == "indicator") {
-        this.configIndicator.variable = this.makeid(10);
-        this.widgets.push(JSON.parse(JSON.stringify(this.configIndicator)));
+        this.iotIndicatorConfig.variable = this.makeid(10);
+        this.widgets.push(JSON.parse(JSON.stringify(this.iotIndicatorConfig)));
       }
     },
     //Delete Widget

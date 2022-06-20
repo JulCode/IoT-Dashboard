@@ -2,6 +2,7 @@
   <div>
     <!-- FORM ADD DEVICE -->
     <div class="row">
+      <Json :value="$store.state.selectedDevice"></Json>
       <card>
         <div slot="header">
           <h4 class="card-title">Add new Device</h4>
@@ -73,7 +74,7 @@
 
         <el-table :data="$store.state.devices">
           <el-table-column label="#" min-width="50" align="center">
-            <div slot-scope="{ row, $index }">
+            <div slot-scope="{ $index }">
               {{ $index + 1 }}
             </div>
           </el-table-column>
@@ -88,7 +89,7 @@
           ></el-table-column>
 
           <el-table-column label="Actions">
-            <div slot-scope="{ row, $index }">
+            <div slot-scope="{ row }">
               <el-tooltip
                 content="Saver Status Indicator"
                 style="margin-right:10px"

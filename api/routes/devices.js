@@ -49,7 +49,7 @@ router.get("/device", checkAuth, async (req, res) => {
       )[0];
       devices[index].template = templates.filter(
         template => template._id == device.templateId
-      );
+      )[0];
     });
 
     const toSend = {
