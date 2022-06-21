@@ -16,7 +16,7 @@
       class="mb-3 pull-right"
       @click="sendValue()"
     >
-      Add
+      {{ config.text }}
     </base-button>
   </card>
 </template>

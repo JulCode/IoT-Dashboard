@@ -642,7 +642,7 @@
         <div class="row">
           <el-table :data="templates">
             <el-table-column min-width="50" label="#" align="center">
-              <div class="photo" slot-scope="{ $index }">
+              <div class="photo" slot-scope="{ row, $index }">
                 {{ $index + 1 }}
               </div>
             </el-table-column>
@@ -660,7 +660,10 @@
             ></el-table-column>
 
             <el-table-column header-align="right" align="right" label="Actions">
-              <div slot-scope="{ row }" class="text-right table-actions">
+              <div
+                slot-scope="{ row, $index }"
+                class="text-right table-actions"
+              >
                 <el-tooltip
                   content="Delete"
                   effect="light"
@@ -777,25 +780,9 @@ export default {
         variable: "var1",
         icon: "fa-sun",
         column: "col-4",
-        widget: "indicator",
+        widget: "button",
         class: "danger",
         message: "{'fanstatus': 'stop'}"
-      },
-      configIndicator: {
-        userId: "userid",
-        selectedDevice: {
-          name: "Home",
-          dId: "8888",
-          templateName: "Power Sensor",
-          templateId: "984237562348756ldksjfh",
-          saverRule: false
-        },
-        variableFullName: "Pump",
-        variable: "var1",
-        icon: "fa-sun",
-        column: "col-6",
-        widget: "indicator",
-        class: "success"
       }
     };
   },
