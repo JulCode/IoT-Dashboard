@@ -74,7 +74,7 @@
 
         <el-table :data="$store.state.devices">
           <el-table-column label="#" min-width="50" align="center">
-            <div slot-scope="{ $index }">
+            <div slot-scope="{ row, $index }">
               {{ $index + 1 }}
             </div>
           </el-table-column>
@@ -89,7 +89,7 @@
           ></el-table-column>
 
           <el-table-column label="Actions">
-            <div slot-scope="{ row }">
+            <div slot-scope="{ row, $index }">
               <el-tooltip
                 content="Saver Status Indicator"
                 style="margin-right:10px"

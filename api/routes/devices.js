@@ -40,8 +40,6 @@ router.get("/device", checkAuth, async (req, res) => {
     //get templates
     const templates = await getTemplates(userId);
 
-    console.log(templates);
-
     //saver rules to -> devices
     devices.forEach((device, index) => {
       devices[index].saverRule = saverRules.filter(
