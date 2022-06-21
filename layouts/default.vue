@@ -2,35 +2,50 @@
   <div class="wrapper" :class="{ 'nav-open': $sidebar.showSidebar }">
     <notifications></notifications>
 
-    <side-bar :background-color="sidebarBackground" short-title="Dash" title="IoT Dashboard">
-      <template slotScope="props" slot="links">
-        <sidebar-item :link="{
-          name: 'Dashboard',
-          icon: 'tim-icons icon-chart-pie-36',
-          path: '/dashboard'
-        }">
-        </sidebar-item>
-        <sidebar-item :link="{
-          name: 'Devices',
-          icon: 'tim-icons icon-chart-pie-36',
-          path: '/devices'
-        }">
-        </sidebar-item>
-        <sidebar-item :link="{
-          name: 'Alarms',
-          icon: 'tim-icons icon-chart-pie-36',
-          path: '/alarms'
-        }">
-        </sidebar-item>
-        <sidebar-item :link="{
-          name: 'Templates',
-          icon: 'tim-icons icon-chart-pie-36',
-          path: '/templates'
-        }">
+    <side-bar
+      :background-color="sidebarBackground"
+      short-title="Jul"
+      title="IoT Dashboard"
+    >
+      <template slot-scope="props" slot="links">
+        <sidebar-item
+          :link="{
+            name: 'Dashboard',
+            icon: 'tim-icons icon-chart-pie-36',
+            path: '/dashboard'
+          }"
+        >
         </sidebar-item>
 
+        <sidebar-item
+          :link="{
+            name: 'Devices',
+            icon: 'tim-icons icon-chart-pie-36',
+            path: '/devices'
+          }"
+        >
+        </sidebar-item>
+
+        <sidebar-item
+          :link="{
+            name: 'Alarms',
+            icon: 'tim-icons icon-chart-pie-36',
+            path: '/alarms'
+          }"
+        >
+        </sidebar-item>
+
+        <sidebar-item
+          :link="{
+            name: 'Templates',
+            icon: 'tim-icons icon-chart-pie-36',
+            path: '/templates'
+          }"
+        >
+        </sidebar-item>
       </template>
     </side-bar>
+
     <!--Share plugin (for demo purposes). You can remove it if don't plan on using it-->
     <sidebar-share :background-color.sync="sidebarBackground"> </sidebar-share>
 
@@ -39,7 +54,7 @@
       <router-view name="header"></router-view>
 
       <div :class="{ content: !isFullScreenRoute }" @click="toggleSidebar">
-        <zoom-center-transition :duration="200" mode="out-in">
+        <zoom-center-transition :duration="1000" mode="out-in">
           <!-- your content here -->
           <nuxt></nuxt>
         </zoom-center-transition>
@@ -48,6 +63,7 @@
     </div>
   </div>
 </template>
+
 <script>
 /* eslint-disable no-new */
 import PerfectScrollbar from "perfect-scrollbar";
@@ -56,7 +72,6 @@ import SidebarShare from "@/components/Layout/SidebarSharePlugin";
 function hasElement(className) {
   return document.getElementsByClassName(className).length > 0;
 }
-
 function initScrollbar(className) {
   if (hasElement(className)) {
     new PerfectScrollbar(`.${className}`);
@@ -67,12 +82,11 @@ function initScrollbar(className) {
     }, 100);
   }
 }
-
 import DashboardNavbar from "@/components/Layout/DashboardNavbar.vue";
 import ContentFooter from "@/components/Layout/ContentFooter.vue";
 import DashboardContent from "@/components/Layout/Content.vue";
 import { SlideYDownTransition, ZoomCenterTransition } from "vue2-transitions";
-
+import mqtt from "mqtt";
 export default {
   components: {
     DashboardNavbar,
@@ -84,7 +98,8 @@ export default {
   },
   data() {
     return {
-      sidebarBackground: "vue" //vue|blue|orange|green|red|primary
+      sidebarBackground: "primary", //vue|blue|orange|green|red|primary
+      client: null
     };
   },
   computed: {
@@ -93,6 +108,63 @@ export default {
     }
   },
   methods: {
+    startMqttClient() {
+      const options = {
+        host: "localhost",
+        port: 8083,
+        endpoint: "/mqtt",
+        clean: true,
+        connectTimeout: 5000,
+        reconnectPeriod: 5000,
+        // Certification Information
+        clientId:
+          "web_" +
+          this.$store.state.auth.userData.name +
+          "_" +
+          Math.floor(Math.random() * 1000000 + 1),
+        username: "superuser",
+        password: "superuser"
+      };
+      //ex topic: "userid/did/variableId/sdata"
+      const deviceSubscribeTopic =
+        this.$store.state.auth.userData._id + "/+/+/sdata";
+      const notifSubscribeTopic =
+        this.$store.state.auth.userData._id + "/+/+/notif";
+      const connectUrl =
+        "ws://" + options.host + ":" + options.port + options.endpoint;
+      try {
+        this.client = mqtt.connect(connectUrl, options);
+      } catch (error) {
+        console.log(error);
+      }
+      //MQTT CONNECTION SUCCESS
+      this.client.on("connect", () => {
+        console.log("Connection succeeded!");
+        //SDATA SUBSCRIBE
+        this.client.subscribe(deviceSubscribeTopic, { qos: 0 }, err => {
+          if (err) {
+            console.log("Error in DeviceSubscription");
+            return;
+          }
+          console.log("Device subscription Success");
+        });
+        //NOTIF SUBSCRIBE
+        this.client.subscribe(notifSubscribeTopic, { qos: 0 }, err => {
+          if (err) {
+            console.log("Error in NotifSubscription");
+            return;
+          }
+          console.log("Notif subscription Success");
+        });
+      });
+      this.client.on("error", error => {
+        console.log("Connection failed", error);
+      });
+      this.client.on("reconnect", error => {
+        console.log("reconnecting:", error);
+      });
+    },
+
     toggleSidebar() {
       if (this.$sidebar.showSidebar) {
         this.$sidebar.displaySidebar(false);
@@ -106,7 +178,6 @@ export default {
         initScrollbar("sidebar");
         initScrollbar("main-panel");
         initScrollbar("sidebar-wrapper");
-
         docClasses.add("perfect-scrollbar-on");
       } else {
         docClasses.add("perfect-scrollbar-off");
@@ -115,38 +186,33 @@ export default {
   },
   mounted() {
     this.initScrollbar();
+    this.startMqttClient();
   }
 };
 </script>
 <style lang="scss">
 $scaleSize: 0.95;
-
 @keyframes zoomIn95 {
   from {
     opacity: 0;
     transform: scale3d($scaleSize, $scaleSize, $scaleSize);
   }
-
   to {
     opacity: 1;
   }
 }
-
 .main-panel .zoomIn {
   animation-name: zoomIn95;
 }
-
 @keyframes zoomOut95 {
   from {
     opacity: 1;
   }
-
   to {
     opacity: 0;
     transform: scale3d($scaleSize, $scaleSize, $scaleSize);
   }
 }
-
 .main-panel .zoomOut {
   animation-name: zoomOut95;
 }
