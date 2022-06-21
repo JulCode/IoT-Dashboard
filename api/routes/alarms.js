@@ -158,6 +158,8 @@ async function createAlarmRule(newAlarm) {
       newAlarm.userId +
       '","dId":"' +
       newAlarm.dId +
+      '","deviceName":"' +
+      newAlarm.deviceName +
       '","payload":${payload},"topic":"${topic}","emqxRuleId":"' +
       mongoRule.emqxRuleId +
       '","value":' +
