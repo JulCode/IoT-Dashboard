@@ -5,7 +5,9 @@ const colors = require("colors");
 
 import Data from "../models/data.js";
 import Device from "../models/device.js";
+import Notification from "../models/notifications.js";
 
+//SAVER WEBHOOK
 router.post("/saver-webhook", async (req, res) => {
   try {
     if (req.headers.token != "121212") {
@@ -38,5 +40,47 @@ router.post("/saver-webhook", async (req, res) => {
     res.sendStatus(200);
   }
 });
+
+router.post("/alarm-webhook", async (req, res) => {
+  try {
+    if (req.headers.token != "121212") {
+      req.sendStatus(404);
+      return;
+    }
+
+    const incomingAlarm = req.body;
+
+    const lastNotif = await Notification.find({
+      dId: incomingAlarm.dId,
+      emqxRuleId: incomingAlarm.emqxRuleId
+    })
+      .sort({ time: -1 })
+      .limit(1);
+
+    if (lastNotif == 0) {
+      console.log("FIRST TIME ALARM");
+      saveNotifToMongo(incomingAlarm);
+    } else {
+      const lastNotifToNowMins = (Date.now() - lastNotif[0].time) / 1000 / 60;
+
+      if (lastNotifToNowMins > incomingAlarm.triggerTime) {
+        console.log("TRIGGERED");
+        saveNotifToMongo(incomingAlarm);
+      }
+    }
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(200);
+  }
+});
+
+function saveNotifToMongo(incomingAlarm) {
+  var newNotif = incomingAlarm;
+  newNotif.time = Date.now();
+  newNotif.readed = false;
+  Notification.create(newNotif);
+}
 
 module.exports = router;

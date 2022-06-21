@@ -100,7 +100,7 @@
             :data="$store.state.selectedDevice.alarmRules"
           >
             <el-table-column min-width="50" label="#" align="center">
-              <div class="photo" slot-scope="{ row, $index }">
+              <div class="photo" slot-scope="{ $index }">
                 {{ $index + 1 }}
               </div>
             </el-table-column>
@@ -110,7 +110,7 @@
               label="Var Name"
             ></el-table-column>
 
-            <el-table-column prop="variable" label="Variable"></el-table-column>
+            <el-table-column prop="variable" label="Var"></el-table-column>
 
             <el-table-column
               prop="condition"
@@ -126,11 +126,13 @@
 
             <el-table-column prop="counter" label="Matches"></el-table-column>
 
-            <el-table-column header-align="right" align="right" label="Actions">
-              <div
-                slot-scope="{ row, $index }"
-                class="text-right table-actions"
-              >
+            <el-table-column
+              min-width="110"
+              header-align="right"
+              align="right"
+              label="Actions"
+            >
+              <div slot-scope="{ row }" class="text-right table-actions">
                 <el-tooltip content="Delete" effect="light" placement="top">
                   <base-button
                     @click="deleteDevice(row)"
