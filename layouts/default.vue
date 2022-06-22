@@ -4,8 +4,8 @@
 
     <side-bar
       :background-color="sidebarBackground"
-      short-title="Jul"
-      title="IoT Dashboard"
+      short-title="GL"
+      title="IoTicos GL"
     >
       <template slot-scope="props" slot="links">
         <sidebar-item
@@ -99,20 +99,8 @@ export default {
   data() {
     return {
       sidebarBackground: "primary", //vue|blue|orange|green|red|primary
-      client:null
-    };
-  },
-  computed: {
-    isFullScreenRoute() {
-      return this.$route.path === "/maps/full-screen";
-    }
-  },
-  beforeDestroy(){
-    this.$nuxt.$off("mqtt-sender");
-  },
-  methods: {
-    startMqttClient() {
-      const options = {
+      client: null,
+      options: {
         host: "localhost",
         port: 8083,
         endpoint: "/mqtt",
@@ -120,34 +108,84 @@ export default {
         connectTimeout: 5000,
         reconnectPeriod: 5000,
         // Certification Information
-        clientId: "web_" + this.$store.state.auth.userData.name + "_" + Math.floor(Math.random() * 1000000 + 1),
-        username: "superuser",
-        password: "superuser"
-      };
-      //ex topic: "userid/did/variableId/sdata"
-      const deviceSubscribeTopic = this.$store.state.auth.userData._id + "/+/+/sdata";
-      const notifSubscribeTopic = this.$store.state.auth.userData._id + "/+/+/notif";
-      const connectUrl = "ws://" + options.host + ":" + options.port + options.endpoint;
+        clientId:
+          "web_" +
+          this.$store.state.auth.userData.name +
+          "_" +
+          Math.floor(Math.random() * 1000000 + 1),
+        username: "",
+        password: ""
+      }
+    };
+  },
+  computed: {
+    isFullScreenRoute() {
+      return this.$route.path === "/maps/full-screen";
+    }
+  },
+  mounted() {
+    this.$store.dispatch("getNotifications");
+    this.initScrollbar();
+    this.startMqttClient();
+  },
+  beforeDestroy() {
+    this.$nuxt.$off("mqtt-sender");
+  },
+  methods: {
+    async getMqttCredentials() {
       try {
-        this.client = mqtt.connect(connectUrl, options);
+        const axiosHeaders = {
+          headers: {
+            token: this.$store.state.auth.token
+          }
+        };
+        const credentials = await this.$axios.post(
+          "/getmqttcredentials",
+          null,
+          axiosHeaders
+        );
+        console.log(credentials.data);
+        if (credentials.data.status == "success") {
+          this.options.username = credentials.data.username;
+          this.options.password = credentials.data.password;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async startMqttClient() {
+      await this.getMqttCredentials();
+      //ex topic: "userid/did/variableId/sdata"
+      const deviceSubscribeTopic =
+        this.$store.state.auth.userData._id + "/+/+/sdata";
+      const notifSubscribeTopic =
+        this.$store.state.auth.userData._id + "/+/+/notif";
+      const connectUrl =
+        "ws://" +
+        this.options.host +
+        ":" +
+        this.options.port +
+        this.options.endpoint;
+      try {
+        this.client = mqtt.connect(connectUrl, this.options);
       } catch (error) {
         console.log(error);
       }
       //MQTT CONNECTION SUCCESS
-      this.client.on('connect', () => {
-        console.log('Connection succeeded!');
+      this.client.on("connect", () => {
+        console.log("Connection succeeded!");
         //SDATA SUBSCRIBE
-        this.client.subscribe(deviceSubscribeTopic, {qos:0}, (err) => {
-          if (err){
+        this.client.subscribe(deviceSubscribeTopic, { qos: 0 }, err => {
+          if (err) {
             console.log("Error in DeviceSubscription");
             return;
           }
           console.log("Device subscription Success");
-          console.log(deviceSubscribeTopic); 
+          console.log(deviceSubscribeTopic);
         });
         //NOTIF SUBSCRIBE
-        this.client.subscribe(notifSubscribeTopic, {qos:0}, (err) => {
-          if (err){
+        this.client.subscribe(notifSubscribeTopic, { qos: 0 }, err => {
+          if (err) {
             console.log("Error in NotifSubscription");
             return;
           }
@@ -155,25 +193,27 @@ export default {
           console.log(notifSubscribeTopic);
         });
       });
-      this.client.on('error', error => {
-          console.log('Connection failed', error)
-      })
-      this.client.on("reconnect", (error) => {
-          console.log("reconnecting:", error);
+      this.client.on("error", error => {
+        console.log("Connection failed", error);
       });
-      this.client.on('message', (topic, message) => {
+      this.client.on("reconnect", error => {
+        console.log("reconnecting:", error);
+      });
+      this.client.on("message", (topic, message) => {
         console.log("Message from topic " + topic + " -> ");
         console.log(message.toString());
         try {
           const splittedTopic = topic.split("/");
           const msgType = splittedTopic[3];
-          if(msgType == "notif"){
-            this.$notify({ type: 'danger', icon: 'tim-icons icon-alert-circle-exc', message: message.toString()});
+          if (msgType == "notif") {
+            this.$notify({
+              type: "danger",
+              icon: "tim-icons icon-alert-circle-exc",
+              message: message.toString()
+            });
             this.$store.dispatch("getNotifications");
             return;
-            
-          }else if (msgType == "sdata"){
-            
+          } else if (msgType == "sdata") {
             $nuxt.$emit(topic, JSON.parse(message.toString()));
             return;
           }
@@ -181,13 +221,12 @@ export default {
           console.log(error);
         }
       });
-      
-      $nuxt.$on('mqtt-sender', (toSend) => {
+
+      $nuxt.$on("mqtt-sender", toSend => {
         this.client.publish(toSend.topic, JSON.stringify(toSend.msg));
       });
     },
-      
-    
+
     toggleSidebar() {
       if (this.$sidebar.showSidebar) {
         this.$sidebar.displaySidebar(false);
@@ -206,11 +245,6 @@ export default {
         docClasses.add("perfect-scrollbar-off");
       }
     }
-  },
-  mounted() {
-    this.$store.dispatch("getNotifications");
-    this.initScrollbar();
-    this.startMqttClient();
   }
 };
 </script>
