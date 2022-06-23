@@ -21,6 +21,46 @@ var client;
 \_| |_/\_|    \___/ 
 */
 
+//GABY 184 clase
+//DEVICE CREDENTIALS WEBHOOK
+router.post("/getdevicecredentials", async (req, res) => {
+  console.log(req.body);
+
+  const toSend = {
+    username: "superuser",
+    password: "superuser",
+    topic: "userid/did/",
+    variables: [
+      {
+        variable: "var1",
+        variableFullName: "Temp",
+        variableType: "input",
+        variableFreq: 1
+      },
+      {
+        variable: "var2",
+        variableFullName: "Hum",
+        variableType: "input",
+        variableFreq: 1
+      },
+      {
+        variable: "var3",
+        variableFullName: "Pump",
+        variableType: "output"
+      },
+      {
+        variable: "var4",
+        variableFullName: "Fan1",
+        variableType: "output"
+      }
+    ]
+  };
+
+  console.log(toSend);
+
+  res.json(toSend);
+});
+
 //SAVER WEBHOOK
 router.post("/saver-webhook", async (req, res) => {
   try {
