@@ -1,10 +1,11 @@
 <template>
   <card>
-    <div class="header">
-      <h3 class="card-title">
+    <div slot="header">
+      <h4 class="card-title">
         {{ config.selectedDevice.name }} - {{ config.variableFullName }}
-      </h3>
+      </h4>
     </div>
+
     <i
       class="fa "
       :class="[config.icon, getIconColorClass()]"
@@ -12,56 +13,75 @@
     ></i>
   </card>
 </template>
+
 <script>
 export default {
-  props: ["config"],
-
+  props: ['config'],
   data() {
     return {
-      value: false
+      value: false,
+      topic: "",
+      props: ['config']      
     };
   },
-  mounted() {
-    const topic =
-      this.config.userId +
-      "/" +
-      this.config.selectedDevice.dId +
-      "/" +
-      this.config.variable +
-      "/sdata";
-    this.$nuxt.$on(topic, this.processReceiveData);
-    console.log(topic);
+  watch:  {
+            config: {
+                immediate: true,
+                deep: true,
+                handler() {
+                    setTimeout(() => {
+                        this.value = false;
+
+                        this.$nuxt.$off(this.topic);
+
+                        //userId/dId/uniquestr/sdata
+                        const topic = this.config.userId + "/" + this.config.selectedDevice.dId + "/" + this.config.variable + "/sdata";
+                        this.$nuxt.$on(topic, this.processReceivedData);
+
+                    }, 300);
+                }
+            }
+        },
+  mounted(){
+    const topic = this.config.userId + "/" + this.config.selectedDevice.dId + "/" + this.config.variable + "/sdata";
+    this.$nuxt.$on(topic, this.processReceivedData);
   },
-  beforeDestroy() {
-    const topic =
-      this.config.userId +
-      "/" +
-      this.config.selectedDevice.dId +
-      "/" +
-      this.config.variable +
-      "/sdata";
-    this.$nuxt.$off(topic, this.processReceiveData);
+  beforeDestroy(){
+    this.$nuxt.$off(this.topic);
   },
   methods: {
-    processReceiveData(data) {
-      console.log("processReceiveData", data);
-      this.value = data.value;
+
+    processReceivedData(data){
+      try {
+        console.log("received");
+        console.log(data);
+        this.value = data.value;
+      } catch (error) {
+        console.log(error);
+      }
     },
+      
     getIconColorClass() {
       if (!this.value) {
         return "text-dark";
       }
-      switch (this.config.class) {
-        case "success":
-          return "text-success";
-        case "warning":
-          return "text-warning";
-        case "danger":
-          return "text-danger";
-        case "primary":
-          return "text-primary";
+
+      if (this.config.class == "success") {
+        return "text-success";
+      }
+      if (this.config.class == "primary") {
+        return "text-primary";
+      }
+      if (this.config.class == "warning") {
+        return "text-warning";
+      }
+      if (this.config.class == "danger") {
+        return "text-danger";
       }
     }
+
   }
 };
+
+
 </script>

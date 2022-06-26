@@ -4,7 +4,7 @@
     <div class="row">
       <card>
         <div slot="header">
-          <h4 class="card-title">Widgets {{ iotIndicatorConfig.column }}</h4>
+          <h4 class="card-title">Widgets {{iotIndicatorConfig.column}}</h4>
         </div>
 
         <div class="row">
@@ -415,6 +415,7 @@
 
             <!-- FORM INDICATOR TYPE -->
             <div v-if="widgetType == 'indicator'">
+
               <base-input
                 v-model="iotIndicatorConfig.variableFullName"
                 label="Var Name"
@@ -566,7 +567,7 @@
           </div>
         </div>
       </card>
-    </div>
+    </div> 
 
     <!-- DASHBOARD PREVIEW -->
     <div class="row">
@@ -605,7 +606,7 @@
     </div>
 
     <!-- SAVE TEMPLATE FORM-->
-    <div class="row">
+    <div class="row" >
       <card>
         <div slot="header">
           <h4 class="card-title">Save Template</h4>
@@ -703,14 +704,14 @@
       </card>
     </div>
 
-    <!-- JSONS -->
-    <Json :value="widgets"></Json>
+
   </div>
 </template>
 
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
+
 export default {
   middleware: "authenticated",
   components: {
@@ -726,6 +727,8 @@ export default {
       widgetType: "",
       templateName: "",
       templateDescription: "",
+
+
       ncConfig: {
         userId: "sampleuserid",
         selectedDevice: {
@@ -741,10 +744,11 @@ export default {
         column: "col-12",
         decimalPlaces: 2,
         widget: "numberchart",
-        icon: "fa-bath",
-        chartTimeAgo: 1566,
+        icon: "fa-sun",
+        chartTimeAgo: 60,
         demo: true
       },
+
       iotSwitchConfig: {
         userId: "userid",
         selectedDevice: {
@@ -759,6 +763,8 @@ export default {
         icon: "fa-bath",
         column: "col-6"
       },
+
+
       iotIndicatorConfig: {
         userId: "userid",
         selectedDevice: {
@@ -774,21 +780,7 @@ export default {
         icon: "fa-bath",
         column: "col-6"
       },
-      //  configButton: {
-      //    userId: "userid",
-      //    selectedDevice: {
-      //      name: "Home",
-      //      dId: "8888"
-      //    },
-      //    variableFullName: "temperature",
-      //    variableType: "output",
-      //    text: "send",
-      //    message: "testing123",
-      //    variable: "varname",
-      //    widget: "button",
-      //    icon: "fa-bath",
-      //    column: "col-6"
-      //  },
+
       configButton: {
         userId: "userid",
         selectedDevice: {
@@ -806,12 +798,16 @@ export default {
         widget: "button",
         class: "danger",
         message: "{'fanstatus': 'stop'}"
-      }
+      },
+
+
     };
   },
+
   mounted() {
     this.getTemplates();
   },
+
   methods: {
     //Get Templates
     async getTemplates() {
@@ -820,9 +816,11 @@ export default {
           token: this.$store.state.auth.token
         }
       };
+
       try {
         const res = await this.$axios.get("/template", axiosHeaders);
         console.log(res.data);
+
         if (res.data.status == "success") {
           this.templates = res.data.data;
         }
@@ -836,6 +834,7 @@ export default {
         return;
       }
     },
+
     //Save Template
     async saveTemplate() {
       const axiosHeaders = {
@@ -843,7 +842,9 @@ export default {
           token: this.$store.state.auth.token
         }
       };
+
       console.log(axiosHeaders);
+
       const toSend = {
         template: {
           name: this.templateName,
@@ -851,8 +852,10 @@ export default {
           widgets: this.widgets
         }
       };
+
       try {
         const res = await this.$axios.post("/template", toSend, axiosHeaders);
+
         if (res.data.status == "success") {
           this.$notify({
             type: "success",
@@ -860,6 +863,8 @@ export default {
             message: "Template created!"
           });
           this.getTemplates();
+
+          this.widgets = [];
         }
       } catch (error) {
         this.$notify({
@@ -871,26 +876,46 @@ export default {
         return;
       }
     },
+
     //Delete Template
     async deleteTemplate(template) {
+
+      
       const axiosHeaders = {
         headers: {
           token: this.$store.state.auth.token
         },
-        params: {
-          templateId: template._id
+        params:{
+          templateId:template._id
         }
       };
+
       console.log(axiosHeaders);
+
       try {
+
         const res = await this.$axios.delete("/template", axiosHeaders);
+
+        console.log(res.data)
+
+        if (res.data.status == "fail" && res.data.error == "template in use") {
+
+          this.$notify({
+            type: "danger",
+            icon: "tim-icons icon-alert-circle-exc",
+            message: template.name + " is in use. First remove the devices linked to the template!"
+          });
+          
+          return;
+        }
+
         if (res.data.status == "success") {
           this.$notify({
             type: "success",
-            icon: "tim-icons icon-alert-circle-exc",
+            icon: "tim-icons icon-check-2",
             message: template.name + " was deleted!"
           });
-
+          
           this.getTemplates();
         }
       } catch (error) {
@@ -903,29 +928,36 @@ export default {
         return;
       }
     },
+
     //Add Widget
     addNewWidget() {
       if (this.widgetType == "numberchart") {
         this.ncConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.ncConfig)));
       }
+
       if (this.widgetType == "switch") {
         this.iotSwitchConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.iotSwitchConfig)));
       }
+
       if (this.widgetType == "button") {
         this.configButton.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.configButton)));
       }
+
       if (this.widgetType == "indicator") {
         this.iotIndicatorConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.iotIndicatorConfig)));
       }
+
     },
+
     //Delete Widget
     deleteWidget(index) {
       this.widgets.splice(index, 1);
     },
+
     makeid(length) {
       var result = "";
       var characters =

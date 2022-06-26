@@ -4,7 +4,7 @@
       <card class="card-login card-white">
         <template slot="header">
           <img src="img//card-primary.png" alt="" />
-          <h1 class="card-title">IoT Julcode</h1>
+          <h1 class="card-title">IoT GL</h1>
         </template>
 
         <div>
@@ -64,7 +64,7 @@
 </template>
 <script>
 export default {
-  middleware: "notAuthenticated",
+  middleware: 'notAuthenticated',
   layout: "auth",
   data() {
     return {
@@ -77,6 +77,7 @@ export default {
   },
   methods: {
     register() {
+
       this.$axios
         .post("/register", this.user)
         .then(res => {
@@ -87,32 +88,43 @@ export default {
               icon: "tim-icons icon-check-2",
               message: "Success! Now you can login..."
             });
+
             this.user.name = "";
             this.user.password = "";
             this.user.email = "";
+
             return;
           }
+
         })
         .catch(e => {
           console.log(e.response.data);
+
           if (e.response.data.error.errors.email.kind == "unique") {
-            this.user.password = "";
             this.$notify({
               type: "danger",
               icon: "tim-icons icon-alert-circle-exc",
               message: "User already exists :("
             });
+
             return;
+
           } else {
-            this.user.password = "";
+
             this.$notify({
               type: "danger",
               icon: "tim-icons icon-alert-circle-exc",
               message: "Error creating user..."
             });
+
             return;
           }
+
+
+
         });
+
+
     }
   }
 };

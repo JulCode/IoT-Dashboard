@@ -7,18 +7,23 @@ pre {
   padding: 5px;
   margin: 5px;
 }
+
 .string {
   color: rgb(93, 240, 93);
 }
+
 .number {
   color: rgb(53, 88, 247);
 }
+
 .boolean {
   color: rgb(255, 255, 0);
 }
+
 .null {
   color: rgb(247, 222, 247);
 }
+
 .key {
   color: #fd5d93;
   font-weight: bold;
@@ -30,7 +35,29 @@ export default {
   name: "Json",
   props: ["value"],
   data() {
-    return {};
+    return {
+        vscodeTunedComments:{
+            "editor.tokenColorCustomizations": {
+
+"textMateRules": [
+    {
+        "scope": "comment.line",
+        "settings": {
+            "fontStyle": "bold italic",
+            "foreground":"#2bff63cd"
+        }
+    },
+    {
+        "scope": "comment.block",
+        "settings": {
+            "fontStyle": "bold",
+            "foreground":"#fe27f7cd" 
+        }
+    }
+]
+},
+        }
+    };
   },
   methods: {
     jsonColor(json) {
