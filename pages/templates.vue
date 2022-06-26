@@ -4,7 +4,7 @@
     <div class="row">
       <card>
         <div slot="header">
-          <h4 class="card-title">Widgets {{iotIndicatorConfig.column}}</h4>
+          <h4 class="card-title">Widgets {{ iotIndicatorConfig.column }}</h4>
         </div>
 
         <div class="row">
@@ -31,7 +31,7 @@
               </el-option>
               <el-option
                 class="text-dark"
-                value="map"
+                value="mapa"
                 label="Map INPUT <-"
               ></el-option>
               <el-option
@@ -415,7 +415,6 @@
 
             <!-- FORM INDICATOR TYPE -->
             <div v-if="widgetType == 'indicator'">
-
               <base-input
                 v-model="iotIndicatorConfig.variableFullName"
                 label="Var Name"
@@ -529,6 +528,41 @@
 
               <br /><br />
             </div>
+            <!--MAP TYPE-->
+            <div v-if="widgetType == 'mapa'">
+              <base-input
+                v-model="iotMap.variableFullName"
+                label="Var Name"
+                type="text"
+              ></base-input>
+              <base-input
+                v-model="iotMap.variableFullName"
+                label="Send Freq"
+                type="text"
+              ></base-input>
+              <el-select
+                v-model="iotMap.column"
+                class="select-success"
+                placeholder="Select Column Width"
+                style="width: 100%;"
+              >
+                <el-option
+                  class="text-dark"
+                  value="col-3"
+                  label="small"
+                ></el-option>
+                <el-option
+                  class="text-primary"
+                  value="col-6"
+                  label="medium"
+                ></el-option>
+                <el-option
+                  class="text-warning"
+                  value="col-12"
+                  label="full"
+                ></el-option>
+              </el-select>
+            </div>
           </div>
 
           <!-- WIDGET PREVIEW -->
@@ -549,6 +583,7 @@
               v-if="widgetType == 'indicator'"
               :config="iotIndicatorConfig"
             ></Iotindicator>
+            <Map v-if="widgetType == 'mapa'" :config="iotMap"></Map>
           </div>
         </div>
 
@@ -567,7 +602,7 @@
           </div>
         </div>
       </card>
-    </div> 
+    </div>
 
     <!-- DASHBOARD PREVIEW -->
     <div class="row">
@@ -602,11 +637,12 @@
           v-if="widget.widget == 'indicator'"
           :config="widget"
         ></Iotindicator>
+        <Map v-if="widget.widget == 'mapa'" :config="widget"></Map>
       </div>
     </div>
 
     <!-- SAVE TEMPLATE FORM-->
-    <div class="row" >
+    <div class="row">
       <card>
         <div slot="header">
           <h4 class="card-title">Save Template</h4>
@@ -703,14 +739,13 @@
         </div>
       </card>
     </div>
-
-
   </div>
 </template>
 
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
+import BaseInput from "../components/Inputs/BaseInput.vue";
 
 export default {
   middleware: "authenticated",
@@ -727,7 +762,6 @@ export default {
       widgetType: "",
       templateName: "",
       templateDescription: "",
-
 
       ncConfig: {
         userId: "sampleuserid",
@@ -764,7 +798,6 @@ export default {
         column: "col-6"
       },
 
-
       iotIndicatorConfig: {
         userId: "userid",
         selectedDevice: {
@@ -799,8 +832,21 @@ export default {
         class: "danger",
         message: "{'fanstatus': 'stop'}"
       },
-
-
+      iotMap: {
+        userId: "userid",
+        selectedDevice: {
+          name: "Map ubication",
+          dId: "8888"
+        },
+        variableFullName: "system",
+        variable: "varname",
+        variableType: "input",
+        variableSendFreq: "30",
+        class: "success",
+        widget: "mapa",
+        icon: "fa-map-marker-alt",
+        column: "col-6"
+      }
     };
   },
 
@@ -879,33 +925,31 @@ export default {
 
     //Delete Template
     async deleteTemplate(template) {
-
-      
       const axiosHeaders = {
         headers: {
           token: this.$store.state.auth.token
         },
-        params:{
-          templateId:template._id
+        params: {
+          templateId: template._id
         }
       };
 
       console.log(axiosHeaders);
 
       try {
-
         const res = await this.$axios.delete("/template", axiosHeaders);
 
-        console.log(res.data)
+        console.log(res.data);
 
         if (res.data.status == "fail" && res.data.error == "template in use") {
-
           this.$notify({
             type: "danger",
             icon: "tim-icons icon-alert-circle-exc",
-            message: template.name + " is in use. First remove the devices linked to the template!"
+            message:
+              template.name +
+              " is in use. First remove the devices linked to the template!"
           });
-          
+
           return;
         }
 
@@ -915,7 +959,7 @@ export default {
             icon: "tim-icons icon-check-2",
             message: template.name + " was deleted!"
           });
-          
+
           this.getTemplates();
         }
       } catch (error) {
@@ -950,7 +994,10 @@ export default {
         this.iotIndicatorConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.iotIndicatorConfig)));
       }
-
+      if (this.widgetType == "mapa") {
+        this.iotMap.variable = this.makeid(10);
+        this.widgets.push(JSON.parse(JSON.stringify(this.iotMap)));
+      }
     },
 
     //Delete Widget

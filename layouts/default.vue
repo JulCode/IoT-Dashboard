@@ -43,14 +43,6 @@
           }"
         >
         </sidebar-item>
-        <sidebar-item
-          :link="{
-            name: 'Mi mapa',
-            icon: 'tim-icons icon-atom',
-            path: '/maps'
-          }"
-        >
-        </sidebar-item>
       </template>
     </side-bar>
 
